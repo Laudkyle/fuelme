@@ -13,11 +13,11 @@ const index = () => {
   
       setTimeout(() => {
         if (token) {
-          router.replace("Home"); // Redirect to Home screen
+          router.replace("/Home"); 
         } else {
-          router.replace("/onboarding"); // Redirect to Onboarding screen
+          router.replace("/onboarding");
         }
-      }, 3000); // 3 seconds delay
+      }, 3000); 
     };
   
     checkLogin();
