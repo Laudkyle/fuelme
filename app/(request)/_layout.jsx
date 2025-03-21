@@ -5,7 +5,8 @@ import { Stack } from 'expo-router'
 const RequestLayout = () => {
   return (
    <Stack>
-          <Stack.Screen name="index" options={{ headerShown: false }} />
+        <Stack.Screen name="Refuel" options={{ headerShown: false }} />
+       
    </Stack>
   )
 }

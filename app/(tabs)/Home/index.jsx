@@ -1,12 +1,12 @@
 import { View, Text, Image, FlatList } from "react-native";
 import React, { useEffect } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { icons, images } from "../../constants";
-import CustomButton from "../../components/CustomButton";
-import FuelStationSlider from "../../components/FuelStationSlider";
-import RefuelingHistoryChart from "../../components/RefuelingHistoryChart";
+import { icons, images } from "../../../constants";
+import CustomButton from "../../../components/CustomButton";
+import FuelStationSlider from "../../../components/FuelStationSlider";
+import RefuelingHistoryChart from "../../../components/RefuelingHistoryChart";
 import { ScrollView } from "react-native-gesture-handler";
-import { useNavigation } from "expo-router";
+import { router, useNavigation } from "expo-router";
 useNavigation;
 // Function to get appropriate greeting
 const getGreeting = () => {
@@ -57,6 +57,7 @@ const Home = () => {
           </Text>
           <CustomButton
             icon={icons.refuel}
+            onPress={()=>{router.push('Home/Refuel')}}
             title={"Refuel now"}
             color="bg-green-100"
           />
