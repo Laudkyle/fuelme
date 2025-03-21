@@ -4,7 +4,7 @@ import React from 'react'
 const MapsLayout = () => {
   return (
    <Stack>
-         <Stack.Screen name="index" options={{ title: "Home" }} />
+         <Stack.Screen name="index" options={{ title: "Maps" }} />
        </Stack>
   )
 }
