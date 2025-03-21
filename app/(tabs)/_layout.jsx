@@ -1,46 +1,49 @@
-import { View, Text, Image, Dimensions } from 'react-native'
-import React from 'react'
+import { View, Image, Animated } from 'react-native'
+import React, { useEffect, useRef } from 'react'
 import { Tabs } from 'expo-router'
-import { icons } from '../../constants'
-import Animated, { useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated'
+import { icons } from '../../constants' 
 
-const { width } = Dimensions.get('window') // Get screen width
-
+// TabIcon Component with Smooth Transition
 const TabIcon = ({ icon, focused, color }) => {
-  const translateY = useSharedValue(focused ? -10 : 0) // Move up smoothly
+  const translateY = useRef(new Animated.Value(0)).current;
 
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ translateY: withSpring(focused ? -10 : 0, { damping: 8 }) }], // Smooth transition
-    backgroundColor: focused ? "purple" : "transparent",
-  }))
+  useEffect(() => {
+    Animated.timing(translateY, {
+      toValue: focused ? -30 : 0, 
+      duration: 1000, 
+      useNativeDriver: true,
+    }).start();
+  }, [focused]);
 
   return (
-    <Animated.View className="items-center justify-center" style={animatedStyle}>
-      <View className="p-3 rounded-full">
+    <Animated.View style={{ transform: [{ translateY }] }} className="items-center justify-center">
+      <View className={`p-3 rounded-full ${focused ? "bg-purple-100" : "bg-transparent"}`}>
         <Image 
           source={icon} 
           resizeMode="contain"
           tintColor={focused ? "#fff" : color}
-          className="w-6 h-6"
+          className="w-7 h-7 "
         />
       </View>
     </Animated.View>
-  )
-}
+  );
+};
 
+// TabsLayout Component
 const TabsLayout = () => {
   return (
     <Tabs screenOptions={{
       tabBarShowLabel: false,
       tabBarInactiveTintColor: '#CDCDE0',
       tabBarStyle: {
-        height: 60,
+        height: 65,
         backgroundColor: '#fff',
         borderTopWidth: 0,
-        elevation: 5,
-        width: width * 0.9, // 90% of viewport width
-        alignSelf: "center", // Center the tab bar
-        borderRadius: 20, // Rounded corners
+        borderRadius:32,
+        width:'80%',
+        margin:"auto",
+        marginBottom:10,
+        elevation: 10
       }
     }}>
       <Tabs.Screen 
@@ -114,7 +117,7 @@ const TabsLayout = () => {
         }}
       />
     </Tabs>
-  )
-}
+  );
+};
 
-export default TabsLayout
+export default TabsLayout;
