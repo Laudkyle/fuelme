@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "269203176225",
+    "project_id": "kylandware",
+    "storage_bucket": "kylandware.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:269203176225:android:85fd71c722a9fc0dd4dc60",
+        "android_client_info": {
+          "package_name": "com.kyleware.aora"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCXJWBnrfLbR3cdjwk5qnHFty_JdsH4Jvc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
