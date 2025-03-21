@@ -3,17 +3,26 @@ import React, { useEffect } from "react";
 import { StatusBar } from "expo-status-bar";
 import { images } from "../constants";
 import { useRouter } from "expo-router";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const index = () => {
   const router = useRouter();
-  const timer = setTimeout(() => {
-    router.replace("/onboarding");
-  }, 3000);
-
   useEffect(() => {
-    return () => clearTimeout(timer);
+    const checkLogin = async () => {
+      const token = await AsyncStorage.getItem("userToken");
+  
+      setTimeout(() => {
+        if (token) {
+          router.replace("Home"); // Redirect to Home screen
+        } else {
+          router.replace("/onboarding"); // Redirect to Onboarding screen
+        }
+      }, 3000); // 3 seconds delay
+    };
+  
+    checkLogin();
   }, []);
-
+  
 
 
   return (

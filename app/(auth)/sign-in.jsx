@@ -3,7 +3,6 @@ import {
   Text,
   Image,
   Pressable,
-  Modal,
   KeyboardAvoidingView,
   ScrollView,
   Platform,
@@ -17,7 +16,6 @@ import CustomButton from "../../components/CustomButton";
 import { Link, router } from "expo-router";
 import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import Pop from "../../components/pop";
 import Checkbox from "expo-checkbox";
 
 const SignIn = () => {
@@ -48,38 +46,45 @@ const SignIn = () => {
   const login = async () => {
     setLoading(true);
     setError("");
-
+  
+    if (!form.phone || !form.pin) {
+      setError("Please enter both phone number and PIN.");
+      setLoading(false);
+      return;
+    }
+  
     try {
-      const response = await fetch("lo/login", {
+      const response = await fetch(`https://fuel-me.onrender.com/api/users/login`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ phone: form.phone, pin: form.pin }),
       });
-
+  
       const data = await response.json();
-
+      console.log(data)
       if (!response.ok) {
+        console.log(response)
         throw new Error(data.message || "Login failed.");
       }
-
-      // Store token if "Remember Me" is checked
-      if (form.rememberMe) {
-        await AsyncStorage.setItem("userToken", data.token);
+  
+      try {
+        if (form.rememberMe && data.accessToken) {
+          await AsyncStorage.setItem("userToken", data.accessToken);
+        } else {
+          console.error("Access token is missing.");
+        }
+        
+      } catch (err) {
+        console.error("Error storing token:", err);
       }
-
-
+  
+      router.replace("Home");
+  
     } catch (error) {
       setError(error.message);
     } finally {
       setLoading(false);
     }
-  };
-
-  const closePopup = () => {
-    setIsPopupVisible(false);
-    router.replace("Home");
   };
 
   return (
@@ -165,7 +170,7 @@ const SignIn = () => {
                 <Text className="text-red-500 mt-2">{error}</Text>
               ) : null}
 
-              <CustomButton title="Login" onPress={login} disabled={loading} />
+              <CustomButton title="Login" onPress={login} loading={loading} disabled={loading} />
 
               <View className="flex-row justify-center mt-4">
                 <Text className="text-gray-500">Don't have an account? </Text>
