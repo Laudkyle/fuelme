@@ -1,10 +1,4 @@
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  Image,
-} from "react-native";
+import { View, Text, TextInput, TouchableOpacity, Image } from "react-native";
 import React, { useState } from "react";
 import { icons } from "../constants";
 
@@ -14,6 +8,7 @@ const FormField = ({
   placeholder,
   value,
   onTextChange,
+  keyboardType,
   leftIcon,
   otherStyle,
   secureTextEntry, // Now can be passed dynamically
@@ -30,7 +25,7 @@ const FormField = ({
 
       {/* Input Container */}
       <View
-        className={`rounded-2xl px-4 border w-64 items-center flex-row ${
+        className={`rounded-2xl px-4 border w-full bg-white items-center flex-row ${
           isFocused ? "border-secondary-100" : "border-gray-200"
         }`}
       >
@@ -48,7 +43,8 @@ const FormField = ({
           onChangeText={onTextChange}
           value={value}
           placeholder={placeholder}
-          className="flex-1 h-10 text-sm text-black"
+          keyboardType={keyboardType}
+          className="flex-1 h-10 text-sm text-black bg-white"
           secureTextEntry={secureTextEntry && !showPin} // Now it can be used for passwords, pins, etc.
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}

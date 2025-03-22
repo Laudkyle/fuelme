@@ -14,12 +14,14 @@ import plus from "../assets/icons/plus.png";
 import refuel from "../assets/icons/refuel.png";
 import hutchback from "../assets/icons/hutchback.png";
 import automatic from "../assets/icons/automatic.png";
+import receipt from "../assets/icons/receipt.png";
 
 export default {
   car,
   cash,
   wallet,
   transmission,
+  receipt,
   cloud,
   location,
   profile,

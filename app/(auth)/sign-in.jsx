@@ -23,7 +23,6 @@ const SignIn = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [form, setForm] = useState({ phone: "", pin: "", rememberMe: false });
-  const [isPopupVisible, setIsPopupVisible] = useState(false);
 
   // Auto-login if token exists
   useEffect(() => {

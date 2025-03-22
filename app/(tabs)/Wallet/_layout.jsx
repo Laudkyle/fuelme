@@ -6,6 +6,7 @@ const WalletLayout = () => {
   return (
     <Stack>
       <Stack.Screen name="index" options={{ title: "Wallet", headerShown:false }} />
+      <Stack.Screen name="CreditDetail" options={{ title: "Details", headerShown:false }} />
     </Stack>
   );
 };

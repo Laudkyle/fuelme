@@ -12,7 +12,7 @@ const index = () => {
       const token = await AsyncStorage.getItem("userToken");
   
       setTimeout(() => {
-        if (token) {
+        if (!token) {
           router.replace("/Home"); 
         } else {
           router.replace("/onboarding");

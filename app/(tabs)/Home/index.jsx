@@ -63,6 +63,8 @@ const Home = () => {
           />
           <CustomButton
             icon={icons.cash}
+            onPress={()=>{router.push('Wallet')}}
+
             title={"Pay Back"}
             color="bg-green-100"
           />

@@ -6,8 +6,8 @@ const CustomButton = ({
   onPress,
   text = "text-white",
   color = "bg-secondary",
-  loading = false, // Loading prop
-  icon = null, // Icon prop (optional)
+  loading = false,
+  icon = null, 
 }) => {
   return (
     <TouchableOpacity
