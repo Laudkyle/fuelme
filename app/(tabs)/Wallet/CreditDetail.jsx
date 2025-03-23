@@ -38,7 +38,7 @@ const CreditDetail = () => {
             icon={icons.cash}
             onPress={() => {
               router.push({
-                pathname: "Wallet/CreditDetail",
+                pathname: "Wallet/Repayment",
                 params: { id, amount, date },
               });
             }}
