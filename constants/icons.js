@@ -1,6 +1,7 @@
 import back from "../assets/icons/back.png";
 import car from "../assets/icons/car.png";
 import cash from "../assets/icons/cash.png";
+import idea from "../assets/icons/idea.png";
 import wallet from "../assets/icons/wallet.png";
 import transmission from "../assets/icons/transmission.png";
 import eye from "../assets/icons/eye.png";
@@ -52,5 +53,6 @@ export default {
   automatic,
   plus,
   back,
+  idea,
   del
 };
