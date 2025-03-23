@@ -8,6 +8,7 @@ const CarsLayout = () => {
       <Stack.Screen name="index" options={{ title: "Cars", headerShown:false }} />
       <Stack.Screen name="Specs" options={{ title: "Specs", headerShown:false }} />
       <Stack.Screen name="AddCar" options={{ title: "AddCar", headerShown:false }} />
+      <Stack.Screen name="CarCompleted" options={{ title: "CarCompleted", headerShown:false }} />
     </Stack>
   );
 };

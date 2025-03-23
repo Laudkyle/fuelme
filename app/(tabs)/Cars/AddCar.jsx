@@ -4,6 +4,7 @@ import {
   SafeAreaView,
   KeyboardAvoidingView,
   Platform,
+  Pressable,
   ScrollView,
   TouchableOpacity,
   Image,
@@ -30,8 +31,8 @@ const AddCar = () => {
     picture: null,
   });
   const [fuelOpen, setFuelOpen] = useState(false);
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const [fuelOptions, setFuelOptions] = useState([
     { label: "Petrol", value: "Petrol" },
@@ -96,24 +97,34 @@ const AddCar = () => {
       Alert.alert("Error", "Please fill all fields and upload an image.");
       return;
     }
-    setLoading(true)
-    const picture = await uploadToCloudinary(form.idFront).catch(() => "");
+    setLoading(true);
+    const picture = await uploadToCloudinary(form.picture).catch(() => "");
     form.picture = picture;
 
     // Submit logic here (API call or local processing)
     console.log("Form Submitted", form);
     Alert.alert("Success", "Car added successfully!");
-    setLoading(false)
-    router.back();
+    setLoading(false);
+    router.push('Cars/CarCompleted');
   };
 
   return (
     <SafeAreaView className="flex-1">
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
-        className="flex-1"
+        className="flex-1 py-4"
       >
-        <HeaderComponent text={"Add Car"} />
+        <HeaderComponent text={"Cars"} />
+        <View className="flex-row items-center px-4 my-2">
+          <Pressable
+            onPress={() => {
+              router.back();
+            }}
+          >
+            <Ionicons name="arrow-back" size={24} color="black" />
+          </Pressable>
+          <Text className="text-xl font-bold mx-auto">Add Car</Text>
+        </View>
         <View className="p-6 mt-2 rounded-lg bg-primary">
           <View>
             <FormField
@@ -135,13 +146,16 @@ const AddCar = () => {
               onTextChange={(text) => handleChange("number", text)}
             />
 
-            <Text className="mb-2 text-gray-700 font-medium">Fuel Type</Text>
+            <Text className="my-2 text-black font-pregular">Fuel Type</Text>
             <DropDownPicker
               open={fuelOpen}
               value={form.fuelType}
               items={fuelOptions}
               setOpen={setFuelOpen}
-              setValue={(value) => handleChange("fuelType", value)}
+              setValue={(callback) => {
+                const value = callback(form.fuelType);
+                handleChange("fuelType", value);
+              }}
               setItems={setFuelOptions}
               placeholder="Select Fuel Type"
               containerStyle={{ marginBottom: 15 }}
