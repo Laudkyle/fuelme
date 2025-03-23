@@ -9,8 +9,8 @@ import {
   TouchableOpacity,
   Alert,
 } from "react-native";
-import React, { useState } from "react";
-import { useRouter } from "expo-router";
+import React, { useState, useEffect } from "react";
+import { useRouter, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import FormField from "../../../components/Formfield";
 import CustomButton from "../../../components/CustomButton";
@@ -19,20 +19,31 @@ import DateTimePickerModal from "react-native-modal-datetime-picker";
 
 const Refuel = () => {
   const router = useRouter();
+  const { id } = useLocalSearchParams();
   const [step, setStep] = useState(1);
   const [fuelQuantity, setFuelQuantity] = useState("");
   const [vehicleType, setVehicleType] = useState(null);
   const [repaymentDate, setRepaymentDate] = useState(new Date());
   const [stationCode, setStationCode] = useState("");
-  const [category, setCategory] = useState("commercial"); // Change dynamically based on user category
+  const [category, setCategory] = useState("commercial");
 
   const [openDatePicker, setOpenDatePicker] = useState(false);
   const [open, setOpen] = useState(false);
   const [items, setItems] = useState([
-    { label: "Car", value: "car" },
-    { label: "Truck", value: "truck" },
-    { label: "Motorcycle", value: "motorcycle" },
+    { label: "Car", value: "0" },
+    { label: "Truck", value: "1" },
+    { label: "Motorcycle", value: "2" },
   ]);
+
+  // Map ID to vehicle type (assuming an ID corresponds to a type)
+  useEffect(() => {
+    if (id) {
+      const mappedVehicleType = items.find((item) => item.value === id)?.value;
+      if (mappedVehicleType) {
+        setVehicleType(mappedVehicleType);
+      }
+    }
+  }, [id, items]);
 
   const validateStep1 = () => {
     if (!fuelQuantity || isNaN(fuelQuantity) || Number(fuelQuantity) <= 0) {
@@ -53,7 +64,6 @@ const Refuel = () => {
     }
 
     try {
-      // Mock API request to validate station
       const stationExists = await checkStationExists(stationCode);
       if (!stationExists) {
         Alert.alert("Error", "Invalid station code. Please enter a valid one.");
@@ -67,10 +77,9 @@ const Refuel = () => {
   };
 
   const checkStationExists = async (code) => {
-    // Simulate an API call (Replace with real API)
     return new Promise((resolve) => {
       setTimeout(() => {
-        resolve(code === "ST123"); 
+        resolve(code === "ST123");
       }, 1500);
     });
   };
@@ -146,7 +155,6 @@ const Refuel = () => {
                     </Text>
                   </TouchableOpacity>
 
-                  {/* MODAL DATE PICKER */}
                   <DateTimePickerModal
                     isVisible={openDatePicker}
                     mode="date"
@@ -192,7 +200,7 @@ const Refuel = () => {
             </View>
           )}
 
-{step === 3 && (
+          {step === 3 && (
             <View className="p-4">
               <View className="border border-gray-300 p-4 rounded-lg bg-white shadow-md">
                 <Text className="text-xl text-center font-bold mb-4 text-gray-900">
@@ -207,25 +215,9 @@ const Refuel = () => {
                 </View>
 
                 <View className="flex-row justify-between mb-3">
-                  <Text className="text-lg text-gray-700">Cost per Litre:</Text>
-                  <Text className="text-lg font-semibold text-gray-900">
-                    GHS 21.00
-                  </Text>
-                </View>
-
-                <View className="flex-row justify-between mb-3">
                   <Text className="text-lg text-gray-700">Total Cost:</Text>
                   <Text className="text-lg font-semibold text-gray-900">
                     GHS {(fuelQuantity * 21).toFixed(2)}
-                  </Text>
-                </View>
-
-                <View className="flex-row justify-between mb-3">
-                  <Text className="text-lg text-gray-700">
-                    Available Credit:
-                  </Text>
-                  <Text className="text-lg font-semibold text-green-600">
-                    GHS 1,000.00
                   </Text>
                 </View>
 

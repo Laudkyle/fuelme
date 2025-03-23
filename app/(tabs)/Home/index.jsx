@@ -15,6 +15,13 @@ const getGreeting = () => {
   if (hour < 18) return "Good Afternoon!";
   return "Good Evening!";
 };
+// Sample filling stations
+const stations = [
+  { id: "1", name: "Goiling Filling Station", location: "Darkuan Junction", latitude: 5.6037, longitude: -0.1870 },
+  { id: "2", name: "Shell Fuel Station", location: "Main Street", latitude: 5.5600, longitude: -0.2057 },
+  { id: "3", name: "Total Energies", location: "Market Road", latitude: 5.5900, longitude: -0.2200 },
+  { id: "4", name: "Allied Oil", location: "East Legon", latitude: 5.6500, longitude: -0.1700 },
+];
 
 const Home = () => {
   return (
@@ -75,7 +82,7 @@ const Home = () => {
           <Text className="text-sm text-black capitalize font-pregular">
             Recent Fuel Stations
           </Text>
-          <FuelStationSlider />
+          <FuelStationSlider data={stations} />
         </View>
 
         {/* Refueling History Chart */}

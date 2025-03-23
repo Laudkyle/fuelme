@@ -22,7 +22,7 @@ const CustomButton = ({
         <ActivityIndicator size="small" color="white" />
       ) : (
         <View className="flex-row items-center">
-          {icon && <Image source={icon} className="w-6 h-6" />} 
+          {icon && <Image source={icon} className="w-6 h-6 text-white mr-1" />} 
           <Text className={`text-sm ${text} capitalize`}>{title}</Text>
         </View>
       )}
