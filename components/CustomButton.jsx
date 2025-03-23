@@ -1,4 +1,10 @@
-import { View, Text, TouchableOpacity, ActivityIndicator, Image } from "react-native";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  ActivityIndicator,
+  Image,
+} from "react-native";
 import React from "react";
 
 const CustomButton = ({
@@ -6,15 +12,17 @@ const CustomButton = ({
   onPress,
   text = "text-white",
   color = "bg-secondary",
+  borderColor = "border-secondary", 
   loading = false,
-  icon = null, 
+  icon = null,
+  disabled,
 }) => {
   return (
     <TouchableOpacity
       activeOpacity={0.7}
-      onPress={loading ? null : onPress} // Disable clicks when loading
-      disabled={loading}
-      className={`w-64 h-12 rounded-xl border border-secondary mx-auto mt-3 ${color} flex-row justify-center items-center ${
+      onPress={loading ? null : onPress} 
+      disabled={loading || disabled}
+      className={`w-64 h-12 rounded-xl border mx-auto mt-3 ${color} ${borderColor} flex-row justify-center items-center ${
         loading ? "opacity-50" : ""
       }`}
     >
@@ -22,7 +30,7 @@ const CustomButton = ({
         <ActivityIndicator size="small" color="white" />
       ) : (
         <View className="flex-row items-center">
-          {icon && <Image source={icon} className="w-6 h-6 text-white mr-1" />} 
+          {icon && <Image source={icon} className="w-6 h-6 text-white mr-1" />}
           <Text className={`text-sm ${text} capitalize`}>{title}</Text>
         </View>
       )}

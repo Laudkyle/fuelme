@@ -97,7 +97,7 @@ const Profile = () => {
             <View className="flex-col space-y-2">
               <TouchableOpacity 
               onPress={()=>{
-                router.push('Profile/Customer')
+                router.push('Profile/CustomerService')
               }}
               className="bg-white p-4 rounded-lg flex-row justify-between">
                 <View className="flex-row gap-x-2">

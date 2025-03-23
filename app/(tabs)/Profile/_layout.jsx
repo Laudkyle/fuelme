@@ -10,8 +10,8 @@ const ProfileLayout = () => {
         options={{ title: "Profile", headerShown: false }}
       />
       <Stack.Screen
-        name="Customer"
-        options={{ title: "Customer", headerShown: false }}
+        name="CustomerService"
+        options={{ title: "CustomerService", headerShown: false }}
       />
       <Stack.Screen
         name="Privacy"
@@ -24,6 +24,10 @@ const ProfileLayout = () => {
       <Stack.Screen
         name="Score"
         options={{ title: "Score", headerShown: false }}
+      />
+      <Stack.Screen
+        name="AddCard"
+        options={{ title: "AddCard", headerShown: false }}
       />
       <Stack.Screen
         name="TermsAndConditions"

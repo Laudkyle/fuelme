@@ -3,6 +3,8 @@ import mtn from "../assets/images/mtn.png";
 import telecel from "../assets/images/telecel.png";
 import airteltigo from "../assets/images/airteltigo.png";
 import profile from "../assets/images/profile.png";
+import visa from "../assets/images/visa.png";
+import Chip from "../assets/images/Chip.png";
 import logoSplash from "../assets/images/logo-splash.png";
 import logoUp from "../assets/images/logo-up.png";
 import bgside from "../assets/images/bg-side.png";
@@ -16,10 +18,12 @@ import transaction from "../assets/images/transaction.gif";
 
 export default {
   camera,
+  visa,
   logoSplash,
   logoUp,
   bgside,
   slide2,
+  Chip,
   slide3,
   fuelStation,
   registration,

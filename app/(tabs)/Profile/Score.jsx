@@ -29,7 +29,7 @@ const Score = () => {
           >
             <Ionicons name="arrow-back" size={24} color="black" />
           </Pressable>
-          <Text className="text-xl font-bold mx-auto">Fuelme Score</Text>
+          <Text className="text-lg font-bold mx-auto">Fuelme Score</Text>
         </View>
       {/* Wrap content inside ScrollView */}
       <ScrollView 
