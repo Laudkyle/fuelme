@@ -13,7 +13,7 @@ const index = () => {
   
       setTimeout(() => {
         if (!token) {
-          router.replace("/Home"); 
+          router.replace("resetPin"); 
         } else {
           router.replace("/onboarding");
         }
