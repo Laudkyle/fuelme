@@ -2,6 +2,7 @@ import camera from "../assets/images/camera.png";
 import mtn from "../assets/images/mtn.png";
 import telecel from "../assets/images/telecel.png";
 import airteltigo from "../assets/images/airteltigo.png";
+import profile from "../assets/images/profile.png";
 import logoSplash from "../assets/images/logo-splash.png";
 import logoUp from "../assets/images/logo-up.png";
 import bgside from "../assets/images/bg-side.png";
@@ -25,6 +26,7 @@ export default {
   completed,
   location,
   mtn,
+  profile,
   telecel,
   airteltigo,
   transaction

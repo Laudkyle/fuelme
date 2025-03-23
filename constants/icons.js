@@ -15,11 +15,25 @@ import refuel from "../assets/icons/refuel.png";
 import hutchback from "../assets/icons/hutchback.png";
 import automatic from "../assets/icons/automatic.png";
 import receipt from "../assets/icons/receipt.png";
+import terms from "../assets/icons/terms.png";
+import idCard from "../assets/icons/id-card.png";
+import payment from "../assets/icons/payment.png";
 import add from "../assets/icons/add.png";
+import medium from "../assets/icons/medium.png";
+import cusomterService from "../assets/icons/customerservice.png";
+import secured from "../assets/icons/secured.png";
+import logout from "../assets/icons/logout.png";
+import del from "../assets/icons/delete.png";
 
 export default {
   add,
-  
+  payment,
+  logout,
+  medium,
+  idCard,
+  terms,
+  cusomterService,
+  secured,
   car,
   cash,
   wallet,
@@ -37,5 +51,6 @@ export default {
   hutchback,
   automatic,
   plus,
-  back
+  back,
+  del
 };
