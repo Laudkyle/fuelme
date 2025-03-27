@@ -12,8 +12,8 @@ const index = () => {
       const token = await AsyncStorage.getItem("userToken");
   
       setTimeout(() => {
-        if (!token) {
-          router.replace("resetPin"); 
+        if (token) {
+          router.replace("Home"); 
         } else {
           router.replace("/onboarding");
         }

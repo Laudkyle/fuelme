@@ -10,7 +10,7 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
-import React, { useState, useRef } from "react";
+import React, { useState, useRef,useContext } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import FormField from "../../components/Formfield";
 import { icons, images } from "../../constants";
@@ -19,7 +19,10 @@ import { Link, router } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
 import axios from "axios";
 import { useNavigation } from "expo-router";
+import AuthContext from "../../AuthContext";
+
 const Register = () => {
+  const {register, loading} = useContext(AuthContext)
   const [step, setStep] = useState(1);
   const [form, setForm] = useState({
     name: "",
@@ -38,82 +41,57 @@ const Register = () => {
 
   const otpInputs = useRef([]);
 
-
-const [loading, setLoading] = useState(false)
-const [error, setError] = useState('')
 const navigation = useNavigation();
 
-const CLOUDINARY_URL = "https://api.cloudinary.com/v1_1/dinb6qtto/image/upload"; 
-
-const uploadToCloudinary = async (imageUri) => {
-  const data = new FormData();
-
-  // Generate a unique filename
-  const uniqueFilename = `image_${Date.now()}_${Math.floor(Math.random() * 10000)}.jpg`;
-
-  data.append("file", { uri: imageUri, name: uniqueFilename, type: "image/jpeg" });
-  data.append("upload_preset", "fuelme");
-
-  try {
-    const response = await axios.post(CLOUDINARY_URL, data, {
-      headers: { "Content-Type": "multipart/form-data" },
-    });
-
-    return response.data.secure_url;  
-  } catch (error) {
-    console.error("Cloudinary Upload Error:", error.response?.data || error.message);
-    return null;
-  }
-};
 
 
-const registerUser = async (form) => {
-  setLoading(true);
-  setError(null);
+// const registerUser = async (form) => {
+//   setLoading(true);
+//   setError(null);
 
-  try {
-    // Upload images & handle errors
-    const idFrontUrl = await uploadToCloudinary(form.idFront).catch(() => "");
-    const idBackUrl = await uploadToCloudinary(form.idBack).catch(() => "");
-    const selfieUrl = await uploadToCloudinary(form.selfie).catch(() => "");
+//   try {
+//     // Upload images & handle errors
+//     const idFrontUrl = await uploadToCloudinary(form.idFront).catch(() => "");
+//     const idBackUrl = await uploadToCloudinary(form.idBack).catch(() => "");
+//     const selfieUrl = await uploadToCloudinary(form.selfie).catch(() => "");
 
-    // Construct request body
-    const requestBody = {
-      user: {
-        phone: form.phone,
-        pin: form.pin,
-      },
-      profile: {
-        name: form.name,
-        address: form.address,
-        email: form.email,
-        category: form.category,
-        staff_id: form.staffId || "",
-        company_id: form.companyId || "",
-        id_image1: idFrontUrl, 
-        id_image2: idBackUrl,
-        personal_image: selfieUrl,
-      },
-    };
+//     // Construct request body
+//     const requestBody = {
+//       user: {
+//         phone: form.phone,
+//         pin: form.pin,
+//       },
+//       profile: {
+//         name: form.name,
+//         address: form.address,
+//         email: form.email,
+//         category: form.category,
+//         staff_id: form.staffId || "",
+//         company_id: form.companyId || "",
+//         id_image1: idFrontUrl, 
+//         id_image2: idBackUrl,
+//         personal_image: selfieUrl,
+//       },
+//     };
 
-    console.log("Final request body:", JSON.stringify(requestBody, null, 2));
+//     console.log("Final request body:", JSON.stringify(requestBody, null, 2));
 
-    // API request
-    const response = await axios.post(`${process.env.backend}/users/register`, requestBody);
+//     // API request
+//     const response = await axios.post(`${process.env.backend}/users/register`, requestBody);
 
-    // Navigate to the success page
-    navigation.navigate("complete");
+//     // Navigate to the success page
+//     navigation.navigate("complete");
 
-    return response.data;
-  } catch (error) {
-    console.error("Full error response:", error.response);
-    const errorMessage = error.response?.data?.message || "Registration failed. Please try again.";
-    setError(errorMessage);
-    return null;
-  } finally {
-    setLoading(false);
-  }
-};
+//     return response.data;
+//   } catch (error) {
+//     console.error("Full error response:", error.response);
+//     const errorMessage = error.response?.data?.message || "Registration failed. Please try again.";
+//     setError(errorMessage);
+//     return null;
+//   } finally {
+//     setLoading(false);
+//   }
+// };
 
   const handleChange = (field, value) => {
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -124,7 +102,7 @@ const registerUser = async (form) => {
     else {
       //register
       console.log("Form Data:", JSON.stringify(form, null, 2));
-      registerUser(form)
+      register(form)
      
     }
   };

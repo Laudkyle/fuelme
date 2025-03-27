@@ -17,16 +17,27 @@ import { StatusBar } from "expo-status-bar";
 const Profile = () => {
   const handleLogout = async () => {
     try {
-      console.log("logged out");
+      // Retrieve and log current AsyncStorage contents before clearing
+      const allKeys = await AsyncStorage.getAllKeys();
+      const storageContents = await AsyncStorage.multiGet(allKeys);
+      
+      console.log("Storage before logout:", storageContents);
+  
       // Clear stored authentication data
-      await AsyncStorage.removeItem("authToken");
-
-      // Navigate to the login screen
-      router.push("sign-in"); 
+      await AsyncStorage.removeItem("userToken");
+      await AsyncStorage.clear();
+  
+      // Check if storage is cleared
+      const keysAfterClear = await AsyncStorage.getAllKeys();
+      console.log("Storage after logout (should be empty):", keysAfterClear);
+  
+      // Redirect to login screen
+      router.replace("/sign-in"); // Ensures user cannot go back to the previous screen
     } catch (error) {
       console.error("Logout failed:", error);
     }
   };
+  
 
   return (
     <SafeAreaView className="flex-1">
@@ -37,10 +48,7 @@ const Profile = () => {
         <HeaderComponent text={"Profile"} />
 
         {/* Wrap content inside ScrollView */}
-        <ScrollView 
-          className="flex-1" 
-          showsVerticalScrollIndicator={false}
-        >
+        <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
           <View className="p-4">
             <View className="flex-col justify-center space-y-1 items-center p-4">
               <Image
@@ -67,9 +75,12 @@ const Profile = () => {
                 <Text className="text-black font-pregular">09E89UI8</Text>
               </TouchableOpacity>
 
-              <TouchableOpacity onPress={()=>{
-                router.push('Profile/Payment')
-              }} className="bg-white p-4 rounded-lg flex-row justify-between">
+              <TouchableOpacity
+                onPress={() => {
+                  router.push("Profile/Payment");
+                }}
+                className="bg-white p-4 rounded-lg flex-row justify-between"
+              >
                 <View className="flex-row gap-x-2">
                   <Image source={icons.payment} className="w-6 h-6" />
                   <Text className="text-black font-pregular">
@@ -78,9 +89,12 @@ const Profile = () => {
                 </View>
                 <Ionicons name="arrow-forward" size={20} color="#333" />
               </TouchableOpacity>
-              <TouchableOpacity onPress={()=>{
-                router.push('Profile/Score')
-              }} className="bg-white p-4 rounded-lg flex-row justify-between">
+              <TouchableOpacity
+                onPress={() => {
+                  router.push("Profile/Score");
+                }}
+                className="bg-white p-4 rounded-lg flex-row justify-between"
+              >
                 <View className="flex-row gap-x-2">
                   <Image source={icons.medium} className="w-6 h-6" />
                   <Text className="text-black font-pregular">Fuelme Score</Text>
@@ -95,38 +109,52 @@ const Profile = () => {
             </View>
 
             <View className="flex-col space-y-2">
-              <TouchableOpacity 
-              onPress={()=>{
-                router.push('Profile/CustomerService')
-              }}
-              className="bg-white p-4 rounded-lg flex-row justify-between">
+              <TouchableOpacity
+                onPress={() => {
+                  router.push("Profile/CustomerService");
+                }}
+                className="bg-white p-4 rounded-lg flex-row justify-between"
+              >
                 <View className="flex-row gap-x-2">
                   <Image source={icons.cusomterService} className="w-6 h-6" />
-                  <Text className="text-black font-pregular">Customer Service</Text>
+                  <Text className="text-black font-pregular">
+                    Customer Service
+                  </Text>
                 </View>
                 <Ionicons name="arrow-forward" size={20} color="#333" />
               </TouchableOpacity>
               <TouchableOpacity
-              onPress={()=>{
-                router.push('Profile/Privacy')
-              }}
-              className="bg-white p-4 rounded-lg flex-row justify-between">
+                onPress={() => {
+                  router.push("Profile/Privacy");
+                }}
+                className="bg-white p-4 rounded-lg flex-row justify-between"
+              >
                 <View className="flex-row gap-x-2">
                   <Image source={icons.secured} className="w-6 h-6" />
-                  <Text className="text-black font-pregular">Privacy Policy</Text>
+                  <Text className="text-black font-pregular">
+                    Privacy Policy
+                  </Text>
                 </View>
                 <Ionicons name="arrow-forward" size={20} color="#333" />
               </TouchableOpacity>
-              <TouchableOpacity onPress={()=>{
-                router.push('Profile/TermsAndConditions')
-              }} className="bg-white p-4 rounded-lg flex-row justify-between">
+              <TouchableOpacity
+                onPress={() => {
+                  router.push("Profile/TermsAndConditions");
+                }}
+                className="bg-white p-4 rounded-lg flex-row justify-between"
+              >
                 <View className="flex-row gap-x-2">
                   <Image source={icons.terms} className="w-6 h-6" />
-                  <Text className="text-black font-pregular">Terms and Conditions</Text>
+                  <Text className="text-black font-pregular">
+                    Terms and Conditions
+                  </Text>
                 </View>
                 <Ionicons name="arrow-forward" size={20} color="#333" />
               </TouchableOpacity>
-              <TouchableOpacity onPress={()=>handleLogout()} className="bg-white p-4 rounded-lg flex-row justify-between">
+              <TouchableOpacity
+                onPress={() => handleLogout()}
+                className="bg-white p-4 rounded-lg flex-row justify-between"
+              >
                 <View className="flex-row gap-x-2">
                   <Image source={icons.logout} className="w-6 h-6" />
                   <Text className="text-black font-pregular">Logout</Text>
@@ -135,7 +163,9 @@ const Profile = () => {
               <TouchableOpacity className="bg-white p-4 rounded-lg flex-row justify-between">
                 <View className="flex-row gap-x-2">
                   <Image source={icons.del} className="w-6 h-6" />
-                  <Text className="text-black font-pregular">Delete Account</Text>
+                  <Text className="text-black font-pregular">
+                    Delete Account
+                  </Text>
                 </View>
               </TouchableOpacity>
             </View>

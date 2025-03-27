@@ -24,10 +24,10 @@ import { icons } from "../../../constants";
 const AddCar = () => {
   const router = useRouter();
   const [form, setForm] = useState({
-    model: "",
+    car_model: "",
     type: "",
-    number: "",
-    fuelType: null,
+    car_number: "",
+    fuel_type: null,
     picture: null,
   });
   const [fuelOpen, setFuelOpen] = useState(false);
@@ -88,10 +88,10 @@ const AddCar = () => {
 
   const handleSubmit = async () => {
     if (
-      !form.model ||
+      !form.car_model ||
       !form.type ||
-      !form.number ||
-      !form.fuelType ||
+      !form.car_number ||
+      !form.fuel_type ||
       !form.picture
     ) {
       Alert.alert("Error", "Please fill all fields and upload an image.");
@@ -130,8 +130,8 @@ const AddCar = () => {
             <FormField
               title={"Car Model"}
               placeholder={"Toyota Camry 2024"}
-              value={form.model}
-              onTextChange={(text) => handleChange("model", text)}
+              value={form.car_model}
+              onTextChange={(text) => handleChange("car_model", text)}
             />
             <FormField
               title={"Car Type"}
@@ -142,19 +142,19 @@ const AddCar = () => {
             <FormField
               title={"Car Number"}
               placeholder={"GT-2024-20"}
-              value={form.number}
-              onTextChange={(text) => handleChange("number", text)}
+              value={form.car_number}
+              onTextChange={(text) => handleChange("car_number", text)}
             />
 
             <Text className="my-2 text-black font-pregular">Fuel Type</Text>
             <DropDownPicker
               open={fuelOpen}
-              value={form.fuelType}
+              value={form.fuel_type}
               items={fuelOptions}
               setOpen={setFuelOpen}
               setValue={(callback) => {
-                const value = callback(form.fuelType);
-                handleChange("fuelType", value);
+                const value = callback(form.fuel_type);
+                handleChange("fuel_type", value);
               }}
               setItems={setFuelOptions}
               placeholder="Select Fuel Type"

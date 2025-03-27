@@ -6,6 +6,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler"; // Import
 import { PopupProvider, usePopup } from "../PopupContext";
 import { Modal, View, Text, TouchableOpacity } from "react-native";
 import { BlurView } from "expo-blur";
+import { AuthProvider } from "../AuthContext";
 SplashScreen.preventAutoHideAsync();
 
 const RenderModal = () => {
@@ -63,18 +64,20 @@ const RootLayout = () => {
 
   return (
     <PopupProvider>
-      <GestureHandlerRootView style={{ flex: 1 }}>
-        <RenderModal />
-        <Stack>
-          <Stack.Screen name="index" options={{ headerShown: false }} />
-          <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} /> 
-          <Stack.Screen
-            name="search/[query]"
-            options={{ headerShown: false }}
-          />
-        </Stack>
-      </GestureHandlerRootView>
+      <AuthProvider>
+        <GestureHandlerRootView style={{ flex: 1 }}>
+          <RenderModal />
+          <Stack>
+            <Stack.Screen name="index" options={{ headerShown: false }} />
+            <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack.Screen
+              name="search/[query]"
+              options={{ headerShown: false }}
+            />
+          </Stack>
+        </GestureHandlerRootView>
+      </AuthProvider>
     </PopupProvider>
   );
 };
