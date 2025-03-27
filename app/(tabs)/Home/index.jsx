@@ -1,5 +1,5 @@
-import { View, Text, Image, FlatList } from "react-native";
-import React, { useEffect } from "react";
+import { View, Text, Image, FlatList, RefreshControl } from "react-native";
+import React, { useState,useEffect,useContext, use } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { icons, images } from "../../../constants";
 import CustomButton from "../../../components/CustomButton";
@@ -7,6 +7,8 @@ import FuelStationSlider from "../../../components/FuelStationSlider";
 import RefuelingHistoryChart from "../../../components/RefuelingHistoryChart";
 import { ScrollView } from "react-native-gesture-handler";
 import { router, useNavigation } from "expo-router";
+import fetchStations from "../../../components/FetchStations";
+import AuthContext from "../../../AuthContext";
 useNavigation;
 // Function to get appropriate greeting
 const getGreeting = () => {
@@ -16,17 +18,39 @@ const getGreeting = () => {
   return "Good Evening!";
 };
 // Sample filling stations
-const stations = [
-  { id: "1", name: "Goiling Filling Station", location: "Darkuan Junction", latitude: 5.6037, longitude: -0.1870 },
-  { id: "2", name: "Shell Fuel Station", location: "Main Street", latitude: 5.5600, longitude: -0.2057 },
-  { id: "3", name: "Total Energies", location: "Market Road", latitude: 5.5900, longitude: -0.2200 },
-  { id: "4", name: "Allied Oil", location: "East Legon", latitude: 5.6500, longitude: -0.1700 },
-];
 
+  const stationsdata = fetchStations()
+  const stations= stationsdata
+  console.log('This is the sations',stations)
 const Home = () => {
+  const [stations, setStations] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false); // State for pull-to-refresh
+
+  const {user,profile} = useContext(AuthContext);
+
+  const loadStations = async () => {
+    setLoading(true);
+    const data = await fetchStations();
+    setStations(data);
+    setLoading(false);
+  };
+  
+  // Function to handle pull-to-refresh
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await loadStations();
+    setRefreshing(false);
+  };
+
+  useEffect(() => {
+    loadStations();
+  }, []);
+
   return (
     <SafeAreaView className="py-2 px-6 h-screen">
       <ScrollView
+      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh}/>}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
         contentContainerStyle={{ flexGrow: 1, paddingBottom: 60 }}
@@ -40,7 +64,7 @@ const Home = () => {
             <Text className="text-center font-pregular text-sm">
               {getGreeting()}
             </Text>
-            <Text className="text-center font-bold text-xl">User Name</Text>
+            <Text className="text-center font-bold text-xl">{profile.name}</Text>
           </View>
 
           {/* Notification Icon */}

@@ -4,13 +4,13 @@ import { StatusBar } from "expo-status-bar";
 import { images } from "../constants";
 import { useRouter } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as SecureStore from "expo-secure-store";
 
 const index = () => {
   const router = useRouter();
   useEffect(() => {
     const checkLogin = async () => {
-      const token = await AsyncStorage.getItem("userToken");
-  
+      const token = await SecureStore.getItemAsync("accessToken");  
       setTimeout(() => {
         if (token) {
           router.replace("Home"); 

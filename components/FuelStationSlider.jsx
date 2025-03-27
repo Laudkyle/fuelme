@@ -7,7 +7,7 @@ const FuelStationSlider = ({ data,onStationPress }) => {
   return (
     <FlatList
       data={data}
-      keyExtractor={(item) => item.id}
+      keyExtractor={(item) => item._id}
       horizontal
       showsHorizontalScrollIndicator={false}
       contentContainerStyle={{ paddingHorizontal: 10 }}

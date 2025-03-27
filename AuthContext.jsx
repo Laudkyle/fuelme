@@ -86,7 +86,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const signIn = async (phone, pin) => {
+  const signIn = async (phone, pin,rememberMe) => {
     setLoading(true);
     setError("");
 
@@ -98,8 +98,8 @@ export const AuthProvider = ({ children }) => {
 
       // Extract data from response
       const { accessToken, refreshToken, user, profile } = response.data;
-
       // Store tokens securely
+
       await SecureStore.setItemAsync("accessToken", accessToken);
       await SecureStore.setItemAsync("refreshToken", refreshToken);
 
@@ -107,7 +107,6 @@ export const AuthProvider = ({ children }) => {
       await AsyncStorage.setItem("user", JSON.stringify(user));
       await AsyncStorage.setItem("profile", JSON.stringify(profile));
 
-      console.log("User data saved successfully!");
 
       // Update user state
       setUser(user);
@@ -129,17 +128,23 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
   };
 
-  // Load user on app start
+  // ✅ Load user & profile on app start
   useEffect(() => {
     const loadUser = async () => {
-      const token = await SecureStore.getItemAsync("userToken");
+      const token = await SecureStore.getItemAsync("accessToken");
+
       if (token) {
-        // Fetch user details if needed
-        setUser({ token });
+        const storedUser = await AsyncStorage.getItem("user");
+        const storedProfile = await AsyncStorage.getItem("profile");
+
+        setUser(storedUser ? JSON.parse(storedUser) : null);
+        setProfile(storedProfile ? JSON.parse(storedProfile) : null);
       }
     };
+
     loadUser();
   }, []);
+
 
   return (
     <AuthContext.Provider

@@ -18,22 +18,25 @@ import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Checkbox from "expo-checkbox";
 import AuthContext from "../../AuthContext";
+import * as SecureStore from "expo-secure-store";
 
 const SignIn = () => {
   const navigation = useNavigation();
   const [form, setForm] = useState({ phone: "", pin: "", rememberMe: false });
   const { signIn, loading, error } = useContext(AuthContext);
 
-  // Auto-login if token exists
   useEffect(() => {
     const checkLogin = async () => {
-      const token = await AsyncStorage.getItem("userToken");
+      const token = await SecureStore.getItemAsync("accessToken");
+      
       if (token) {
-        router.replace("Home"); // Redirect to Home screen
+        router.replace("Home"); // Redirect to H
+        // home screen
       }
     };
     checkLogin();
   }, []);
+  
 
   const handleChange = (field, value) => {
     setForm((prevForm) => ({
@@ -44,7 +47,7 @@ const SignIn = () => {
 
   const handleLogin = () => {
     if (form.phone && form.pin) {
-      signIn(form.phone, form.pin);
+      signIn(form.phone, form.pin,form.rememberMe);
     }
   };
   
