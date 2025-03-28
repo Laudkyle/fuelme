@@ -6,9 +6,10 @@ import {
   Platform,
   TouchableOpacity,
   Pressable,
-  KeyboardAvoidingView,RefreshControl 
+  KeyboardAvoidingView,
+  RefreshControl,
 } from "react-native";
-import { useState,useEffect,useCallback, useContext } from "react";
+import { useState, useEffect, useCallback, useContext } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import api from "../../../api";
 import { Ionicons } from "@expo/vector-icons";
@@ -24,8 +25,7 @@ const Payment = () => {
   const [cards, setCards] = useState([]);
   const [momo, setMomo] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
-const {user,profile} = useContext(AuthContext);
-console.log("user from profile ",profile.user_uuid)
+  const { profile } = useContext(AuthContext);
   // Function to fetch cards and momo data
   const fetchData = async () => {
     try {
@@ -33,16 +33,15 @@ console.log("user from profile ",profile.user_uuid)
         api.get(`/cards/user/${profile.user_uuid}`).catch(() => null),
         api.get(`/momo/user/${profile.user_uuid}`).catch(() => null),
       ]);
-  
+
       // Set cards only if the response is valid
       setCards(cardsResponse?.data || []);
       setMomo(momoResponse?.data || []);
-  
     } catch (error) {
       console.error("Error fetching data:", error);
     }
   };
-  
+
   useEffect(() => {
     fetchData();
   }, []);
@@ -79,34 +78,38 @@ console.log("user from profile ",profile.user_uuid)
             router.push("Profile/AddCard");
           }}
         />
-       <ScrollView
-  className="flex-1"
-  showsVerticalScrollIndicator={false}
-  refreshControl={
-    <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-  }
->
-  {cards.length === 0 && momo.length === 0 ? (
-    <Text className="text-center text-gray-500 mt-4">
-      You can add a card to see them here.
-    </Text>
-  ) : (
-    <>
-      {cards.map((card) => (
-        <VisaCard
-          key={card._id}
-          cardholder={card.name}
-          cardNumber={card.card_number}
-          expiry={card.expiry_date}
-        />
-      ))}
-      {momo.map((momoItem) => (
-        <MomoCard key={momoItem._id} name={momoItem.name} phoneNumber={momoItem.phone} />
-      ))}
-    </>
-  )}
-</ScrollView>
-
+        <ScrollView
+          className="flex-1"
+          showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }
+        >
+          {cards.length === 0 && momo.length === 0 ? (
+            <Text className="text-center text-gray-500 mt-4">
+              You can add a card to see them here.
+            </Text>
+          ) : (
+            <>
+              {cards.map((card) => (
+                <VisaCard
+                  key={card._id}
+                  cardholder={card.name}
+                  cardNumber={card.card_number}
+                  expiry={card.expiry_date}
+                />
+              ))}
+              {momo.map((momoItem) => (
+                <MomoCard
+                  key={momoItem._id}
+                  name={momoItem.name}
+                  phoneNumber={momoItem.phone}
+                  vendor={momoItem.vendor}
+                />
+              ))}
+            </>
+          )}
+        </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );

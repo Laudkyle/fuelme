@@ -1,5 +1,5 @@
 import { View, Text, Image, FlatList, RefreshControl } from "react-native";
-import React, { useState,useEffect,useContext, use } from "react";
+import React, { useState, useEffect, useContext, use } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { icons, images } from "../../../constants";
 import CustomButton from "../../../components/CustomButton";
@@ -19,15 +19,15 @@ const getGreeting = () => {
 };
 // Sample filling stations
 
-  const stationsdata = fetchStations()
-  const stations= stationsdata
-  console.log('This is the sations',stations)
+const stationsdata = fetchStations();
+const stations = stationsdata;
+console.log("This is the sations", stations);
 const Home = () => {
   const [stations, setStations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false); // State for pull-to-refresh
 
-  const {user,profile} = useContext(AuthContext);
+  const { user, profile } = useContext(AuthContext);
 
   const loadStations = async () => {
     setLoading(true);
@@ -35,7 +35,7 @@ const Home = () => {
     setStations(data);
     setLoading(false);
   };
-  
+
   // Function to handle pull-to-refresh
   const onRefresh = async () => {
     setRefreshing(true);
@@ -50,7 +50,9 @@ const Home = () => {
   return (
     <SafeAreaView className="py-2 px-6 h-screen">
       <ScrollView
-      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh}/>}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
         contentContainerStyle={{ flexGrow: 1, paddingBottom: 60 }}
@@ -64,7 +66,9 @@ const Home = () => {
             <Text className="text-center font-pregular text-sm">
               {getGreeting()}
             </Text>
-            <Text className="text-center font-bold text-xl">{profile.name}</Text>
+            <Text className="text-center font-bold text-xl">
+              {profile.name}
+            </Text>
           </View>
 
           {/* Notification Icon */}
@@ -72,7 +76,7 @@ const Home = () => {
         </View>
 
         {/* Credit Section */}
-        <View className="bg-secondary-100 w-full h-[40%] mt-2 rounded-2xl p-4">
+        <View className="bg-secondary-100 w-full h-[42%] mt-2 rounded-2xl p-4">
           <Text className="text-white text-sm text-center capitalize">
             available credit limit
           </Text>
@@ -88,14 +92,18 @@ const Home = () => {
           </Text>
           <CustomButton
             icon={icons.refuel}
-            onPress={()=>{router.push('Home/Refuel')}}
+            onPress={() => {
+              router.push("Home/Refuel");
+            }}
             title={"Refuel now"}
             color="bg-green-100"
           />
           <CustomButton
             icon={icons.cash}
-            onPress={()=>{router.push('Wallet')}}
-
+            onPress={() => {
+              router.push("Wallet");
+            }}
+            className="mb-6"
             title={"Pay Back"}
             color="bg-green-100"
           />

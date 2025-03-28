@@ -18,7 +18,7 @@ import CustomButton from "../../../components/CustomButton";
 import { useLocalSearchParams } from "expo-router";
 
 const Specs = () => {
-  const { id, model, number, date, type, transmission, fuel, img } =
+  const { id, model, number, date, transmission, fuel, img } =
     useLocalSearchParams();
 
   return (
@@ -63,8 +63,8 @@ const Specs = () => {
                       <Text className="font-semibold">{model}</Text>
                     </View>
                     <View className="flex-row justify-between pb-2">
-                      <Text className="text-gray-600">Type</Text>
-                      <Text className="font-semibold"> {type}</Text>
+                      <Text className="text-gray-600">Transmission</Text>
+                      <Text className="font-semibold"> {transmission}</Text>
                     </View>
                     <View className="flex-row justify-between pb-2">
                       <Text className="text-gray-600">Car Number</Text>

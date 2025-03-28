@@ -24,17 +24,14 @@ const CarCard = ({ id,model, number, date, type, transmission, fuel, img, onPres
           </View>
         </View>
       </View>
-      <View className="p-4 flex-row justify-evenly">
-        <View className="flex-row items-center">
-          <Image source={icons.hutchback} className="w-6 h-6 mr-2" />
-          <Text className="capitalize text-xs">{type}</Text>
-        </View>
+      <View className="p-4 flex-row justify-between">
+       
 
-        <View className="flex-row items-center">
+        <View className="flex-row px-4 items-center">
           <Image source={icons.transmission} className="w-6 h-6 mr-2" />
           <Text className="capitalize text-xs">{fuel}</Text>
         </View>
-        <View className="flex-row items-center">
+        <View className="flex-row px-4 items-center">
           <Image source={icons.automatic} className="w-6 h-6 mr-2" />
           <Text className="capitalize text-xs">{transmission}</Text>
         </View>

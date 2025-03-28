@@ -29,14 +29,20 @@ const AddCar = () => {
     car_number: "",
     fuel_type: null,
     picture: null,
+    transmission:"Automatic"
   });
   const [fuelOpen, setFuelOpen] = useState(false);
+  const [transmissionOpen, setTransmissionOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   const [fuelOptions, setFuelOptions] = useState([
     { label: "Petrol", value: "Petrol" },
     { label: "Diesel", value: "Diesel" },
+  ]);
+  const [transmissionOptions, setTransmissionOptions] = useState([
+    { label: "Automatic", value: "Automatic" },
+    { label: "Manual", value: "Manual" },
   ]);
 
   const CLOUDINARY_URL =
@@ -125,13 +131,30 @@ const AddCar = () => {
           </Pressable>
           <Text className="text-xl font-bold mx-auto">Add Car</Text>
         </View>
-        <View className="p-6 mt-2 rounded-lg bg-primary">
+        <ScrollView
+        contentContainerStyle={{ flexGrow: 1 }}
+        keyboardShouldPersistTaps="handled"
+        className="p-6 my-2 py-6 rounded-lg bg-primary">
           <View>
             <FormField
               title={"Car Model"}
               placeholder={"Toyota Camry 2024"}
               value={form.car_model}
               onTextChange={(text) => handleChange("car_model", text)}
+            />
+            <Text className="my-2 text-black font-pregular">Transmission</Text>
+            <DropDownPicker
+              open={transmissionOpen}
+              value={form.transmission}
+              items={transmissionOptions}
+              setOpen={setTransmissionOpen}
+              setValue={(callback) => {
+                const value = callback(form.transmission);
+                handleChange("transmission", value);
+              }}
+              setItems={setFuelOptions}
+              placeholder="Select Gear Transmission"
+              containerStyle={{ marginBottom: 15 }}
             />
             <FormField
               title={"Car Type"}
@@ -160,6 +183,7 @@ const AddCar = () => {
               placeholder="Select Fuel Type"
               containerStyle={{ marginBottom: 15 }}
             />
+            
 
             <TouchableOpacity onPress={handleImagePick}>
               <View className="border-dashed border border-gray-500 bg-gray-100 p-6 flex items-center justify-center w-full h-40">
@@ -188,7 +212,7 @@ const AddCar = () => {
               loading={loading}
             />
           </View>
-        </View>
+        </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );

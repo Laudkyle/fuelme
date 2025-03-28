@@ -87,8 +87,9 @@ const AddCard = () => {
         }
 
         payload = {
-          user_uuid: profile.user_uuid, // Include user_uuid
+          user_uuid: profile.user_uuid, 
           name: form.name,
+          phone_number:form.phone,
           card_number: form.card_number,
           expiry_date: form.expiry_date,
           cvc: form.cvc,
