@@ -50,7 +50,7 @@ api.interceptors.response.use(
         }
 
         // Request a new access token
-        const { data } = await axios.post(`${API_BASE_URL}/users/refresh`, { refreshToken });
+        const { data } = await axios.post(`${API_BASE_URL}/users/refresh-token`, { refreshToken });
 
         // Save new tokens securely
         await SecureStore.setItemAsync("accessToken", data.accessToken);
