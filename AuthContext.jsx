@@ -13,27 +13,37 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const backendURL = process.env.backend; // Ensure this is correctly set
+  const backendURL = process.env.backend; 
 
-  const CLOUDINARY_URL = "https://api.cloudinary.com/v1_1/dinb6qtto/image/upload"; 
+  const CLOUDINARY_URL =
+    "https://api.cloudinary.com/v1_1/dinb6qtto/image/upload";
 
   const uploadToCloudinary = async (imageUri) => {
     const data = new FormData();
-  
+
     // Generate a unique filename
-    const uniqueFilename = `image_${Date.now()}_${Math.floor(Math.random() * 10000)}.jpg`;
-  
-    data.append("file", { uri: imageUri, name: uniqueFilename, type: "image/jpeg" });
+    const uniqueFilename = `image_${Date.now()}_${Math.floor(
+      Math.random() * 10000
+    )}.jpg`;
+
+    data.append("file", {
+      uri: imageUri,
+      name: uniqueFilename,
+      type: "image/jpeg",
+    });
     data.append("upload_preset", "fuelme");
-  
+
     try {
       const response = await axios.post(CLOUDINARY_URL, data, {
         headers: { "Content-Type": "multipart/form-data" },
       });
-  
-      return response.data.secure_url;  
+
+      return response.data.secure_url;
     } catch (error) {
-      console.error("Cloudinary Upload Error:", error.response?.data || error.message);
+      console.error(
+        "Cloudinary Upload Error:",
+        error.response?.data || error.message
+      );
       return null;
     }
   };
@@ -41,13 +51,13 @@ export const AuthProvider = ({ children }) => {
   const register = async (form) => {
     setLoading(true);
     setError(null);
-  
+
     try {
       // Upload images & handle errors
       const idFrontUrl = await uploadToCloudinary(form.idFront).catch(() => "");
       const idBackUrl = await uploadToCloudinary(form.idBack).catch(() => "");
       const selfieUrl = await uploadToCloudinary(form.selfie).catch(() => "");
-  
+
       // Construct request body
       const requestBody = {
         user: {
@@ -61,24 +71,29 @@ export const AuthProvider = ({ children }) => {
           category: form.category,
           staff_id: form.staffId || "",
           company_id: form.companyId || "",
-          id_image1: idFrontUrl, 
+          id_image1: idFrontUrl,
           id_image2: idBackUrl,
           personal_image: selfieUrl,
         },
       };
-  
+
       console.log("Final request body:", JSON.stringify(requestBody, null, 2));
-  
+
       // API request
-      const response = await axios.post(`${backendURL}/users/register`, requestBody);
-  
+      const response = await axios.post(
+        `${backendURL}/users/register`,
+        requestBody
+      );
+
       // Navigate to the success page
       router.push("complete");
-  
+
       return response.data;
     } catch (error) {
       console.error("Full error response:", error);
-      const errorMessage = error.response?.data?.message || "Registration failed. Please try again.";
+      const errorMessage =
+        error.response?.data?.message ||
+        "Registration failed. Please try again.";
       setError(errorMessage);
       return null;
     } finally {
@@ -86,7 +101,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const signIn = async (phone, pin,rememberMe) => {
+  const signIn = async (phone, pin, rememberMe) => {
     setLoading(true);
     setError("");
 
@@ -102,11 +117,10 @@ export const AuthProvider = ({ children }) => {
 
       await SecureStore.setItemAsync("accessToken", accessToken);
       await SecureStore.setItemAsync("refreshToken", refreshToken);
-
+      
       // Store user & profile in AsyncStorage
       await AsyncStorage.setItem("user", JSON.stringify(user));
       await AsyncStorage.setItem("profile", JSON.stringify(profile));
-
 
       // Update user state
       setUser(user);
@@ -144,7 +158,6 @@ export const AuthProvider = ({ children }) => {
 
     loadUser();
   }, []);
-
 
   return (
     <AuthContext.Provider

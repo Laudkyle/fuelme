@@ -56,6 +56,8 @@ api.interceptors.response.use(
         await SecureStore.setItemAsync("accessToken", data.accessToken);
         await SecureStore.setItemAsync("refreshToken", data.refreshToken);
 
+        console.log("this is the refresh", refreshToken)
+
         // Retry the failed request with the new token
         originalRequest.headers.Authorization = `Bearer ${data.accessToken}`;
         return api(originalRequest);

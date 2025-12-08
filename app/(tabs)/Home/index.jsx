@@ -25,7 +25,7 @@ console.log("This is the sations", stations);
 const Home = () => {
   const [stations, setStations] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false); // State for pull-to-refresh
+  const [refreshing, setRefreshing] = useState(false); 
 
   const { user, profile } = useContext(AuthContext);
 

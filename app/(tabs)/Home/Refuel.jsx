@@ -9,13 +9,15 @@ import {
   TouchableOpacity,
   Alert,
 } from "react-native";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import FormField from "../../../components/Formfield";
 import CustomButton from "../../../components/CustomButton";
 import DropDownPicker from "react-native-dropdown-picker";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
+import AuthContext from "../../../AuthContext";
+import api from "../../../api";
 
 const Refuel = () => {
   const router = useRouter();
@@ -24,16 +26,48 @@ const Refuel = () => {
   const [fuelQuantity, setFuelQuantity] = useState("");
   const [vehicleType, setVehicleType] = useState(null);
   const [repaymentDate, setRepaymentDate] = useState(new Date());
+  const [stations, setStations] = useState([]);
   const [stationCode, setStationCode] = useState("");
   const [category, setCategory] = useState("commercial");
 
   const [openDatePicker, setOpenDatePicker] = useState(false);
   const [open, setOpen] = useState(false);
-  const [items, setItems] = useState([
-    { label: "Car", value: "0" },
-    { label: "Truck", value: "1" },
-    { label: "Motorcycle", value: "2" },
-  ]);
+  const [items, setItems] = useState([]);
+
+  const { user, profile } = useContext(AuthContext);
+  useEffect(() => {
+    const fetchUserCars = async () => {
+      try {
+        const userUUID = profile.user_uuid; 
+        const response = await api.get(`/cars/user/${userUUID}`);
+        const carItems = response.data.map((car) => ({
+          label: car.car_model || "Unnamed Car",
+          value: car.car_uuid,
+        }));
+        setItems(carItems);
+      } catch (error) {
+        console.error("Failed to fetch user cars:", error);
+      }
+    };
+
+    fetchUserCars();
+  }, []);
+  useEffect(() => {
+    const fetchStations = async () => {
+      try {
+        const response = await api.get("/stations");
+        const stationOptions = response.data.map((station) => ({
+          label: station.name || station.station_code,
+          value: station.station_code,
+        }));
+        setStations(stationOptions);
+      } catch (error) {
+        console.error("Error fetching stations:", error);
+      }
+    };
+
+    fetchStations();
+  }, []);
 
   // Map ID to vehicle type (assuming an ID corresponds to a type)
   useEffect(() => {
@@ -127,7 +161,7 @@ const Refuel = () => {
                 keyboardType="numeric"
               />
 
-              <Text className="text-gray-600 mt-3 mb-1">Vehicle Type</Text>
+              <Text className="text-gray-600 mt-3 mb-1">Vehicle</Text>
               <DropDownPicker
                 open={open}
                 value={vehicleType}
