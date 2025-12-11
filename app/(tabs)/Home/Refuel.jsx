@@ -25,6 +25,7 @@ const Refuel = () => {
   const router = useRouter();
   const [step, setStep] = useState(1);
   const [fuelQuantity, setFuelQuantity] = useState("");
+  const [amount, setAmount] = useState("");
   const [vehicleType, setVehicleType] = useState(null);
   const [vehicleFuel, setVehicleFuel] = useState(null);
   const [repaymentDate, setRepaymentDate] = useState(new Date());
@@ -33,6 +34,8 @@ const Refuel = () => {
   const [category, setCategory] = useState("commercial");
   const [stationError, setStationError] = useState("");
   const [isVerifying, setIsVerifying] = useState(false);
+  const [fuelPrice, setFuelPrice] = useState(0);
+  const [isLoadingPrice, setIsLoadingPrice] = useState(false);
 
   const [openDatePicker, setOpenDatePicker] = useState(false);
   const [open, setOpen] = useState(false);
@@ -50,45 +53,117 @@ const Refuel = () => {
     refreshStations 
   } = useStations();
 
- const fetchUserCars = async () => {
-      try {
-        const userUUID = profile.user_uuid; 
-        const response = await api.get(`/cars/user/${userUUID}`);
-        const carItems = response.data.map((car) => ({
-          label: car.car_model || "Unnamed Car",
-          value: car.car_uuid,
-          fuel_type: car.fuel_type
-        }));
-        setItems(carItems);
-      } catch (error) {
-        console.error("Failed to fetch user cars:", error);
+  // Fetch user cars
+  const fetchUserCars = async () => {
+    try {
+      const userUUID = profile.user_uuid; 
+      const response = await api.get(`/cars/user/${userUUID}`);
+      const carItems = response.data.map((car) => ({
+        label: car.car_model || "Unnamed Car",
+        value: car.car_uuid,
+        fuel_type: car.fuel_type
+      }));
+      setItems(carItems);
+    } catch (error) {
+      console.error("Failed to fetch user cars:", error);
+    }
+  };
+
+// Fetch fuel price from backend for a specific station
+const fetchFuelPrice = async (fuelType, stationCode) => {
+  if (!fuelType) return;
+  
+  setIsLoadingPrice(true);
+  try {
+    // Convert fuel_type to match API endpoint
+    const endpoint = fuelType.toLowerCase().includes('petrol') 
+      ? '/ppl/petrol' 
+      : '/ppl/diesel';
+    
+    // If we have a station code, use it to get station-specific price
+    if (stationCode) {
+      const response = await api.get(`${endpoint}/${stationCode}`);
+      
+      if (response.data && response.data.price) {
+        setFuelPrice(response.data.price);
+      } else if (response.data && response.data.average_price) {
+        // If specific station doesn't have price, use average
+        setFuelPrice(response.data.average_price);
+        Alert.alert("Info", `${stationCode} doesn't have specific ${fuelType} price. Using average market price.`);
+      } else {
+        // Fallback price if API doesn't return expected format
+        const defaultPrice = fuelType.toLowerCase().includes('petrol') ? 21.00 : 23.50;
+        setFuelPrice(defaultPrice);
+        Alert.alert("Info", "Using default fuel price. Please check with station.");
       }
-    };
+    } else {
+      // No station code yet, get average market price
+      const response = await api.get(endpoint);
+      
+      if (response.data && response.data.average_price) {
+        setFuelPrice(response.data.average_price);
+      } else if (response.data && response.data.price) {
+        // For single station response (when no code but station has price)
+        setFuelPrice(response.data.price);
+      } else {
+        // Fallback price if API doesn't return expected format
+        const defaultPrice = fuelType.toLowerCase().includes('petrol') ? 21.00 : 23.50;
+        setFuelPrice(defaultPrice);
+        Alert.alert("Info", "Using default fuel price. Please check with station.");
+      }
+    }
+  } catch (error) {
+    console.error("Failed to fetch fuel price:", error);
+    // Set default prices based on fuel type
+    const defaultPrice = fuelType?.toLowerCase().includes('petrol') ? 21.00 : 23.50;
+    setFuelPrice(defaultPrice);
+    Alert.alert("Warning", "Could not fetch current fuel price. Using default value.");
+  } finally {
+    setIsLoadingPrice(false);
+  }
+};
+
   useEffect(() => {
     fetchUserCars();
   }, []);
 
- 
- // Handle vehicle selection change
+  // Handle vehicle selection change
   useEffect(() => {
     if (vehicleType) {
       const selectedCar = items.find((item) => item.value === vehicleType);
       if (selectedCar) {
         setVehicleFuel(selectedCar.fuel_type);
+        fetchFuelPrice(selectedCar.fuel_type,stationCode);
       }
     }
   }, [vehicleType, items]);
 
+  // Calculate liters when amount changes
+  useEffect(() => {
+    if (amount && fuelPrice > 0) {
+      const liters = (parseFloat(amount) / fuelPrice).toFixed(2);
+      setFuelQuantity(liters);
+    } else if (!amount) {
+      setFuelQuantity("");
+    }
+  }, [amount, fuelPrice]);
+
   const validateStep1 = () => {
-    if (!fuelQuantity || isNaN(fuelQuantity) || Number(fuelQuantity) <= 0) {
-      Alert.alert("Validation Error", "Please enter a valid fuel quantity.");
-      
+    if (!amount || isNaN(amount) || Number(amount) <= 0) {
+      Alert.alert("Validation Error", "Please enter a valid amount.");
       return false;
     }
+    
     if (!vehicleType) {
       Alert.alert("Validation Error", "Please select a vehicle type.");
       return false;
     }
+    
+    if (fuelPrice <= 0) {
+      Alert.alert("Validation Error", "Fuel price not available. Please try again.");
+      return false;
+    }
+    
     return true;
   };
 
@@ -100,6 +175,7 @@ const Refuel = () => {
       setStationError("Please enter a station code.");
       return false;
     }
+    
     setIsVerifying(true);
     
     try {
@@ -116,10 +192,10 @@ const Refuel = () => {
       if (!isActive) {
         setStationError("This station is currently inactive. Please select another station.");
         return false;
-      }    
-        const stationDetails = getStationDetails(stationCode, 'code');
-        setStation(stationDetails.station_uuid)
-
+      }
+      
+      const stationDetails = getStationDetails(stationCode, 'code');
+      setStation(stationDetails.station_uuid);
 
       return true;
     } catch (error) {
@@ -153,25 +229,23 @@ const Refuel = () => {
   };
 
   const handleSubmit = () => {
-
     const refuelData = {
       user_uuid,
-      car_uuid:vehicleType,
-      fuel_type:vehicleFuel,
-      fuel:fuelQuantity,
-      repaymentDate:  repaymentDate,
-      station_uuid:station
+      car_uuid: vehicleType,
+      fuel_type: vehicleFuel,
+      fuel: fuelQuantity,
+      amount: parseFloat(amount), // Add amount to submission
+      repaymentDate: repaymentDate,
+      station_uuid: station
     };
     
     console.log("Submitting Refuel Request:", refuelData);
-   submitRefuelRequest(refuelData);
+    submitRefuelRequest(refuelData);
   };
 
   const submitRefuelRequest = async (refuelData) => {
     try {
-      
       await api.post('/requests', refuelData);
-      
       router.push("Home/Completed");
     } catch (error) {
       console.error("Failed to submit refuel request:", error);
@@ -185,7 +259,7 @@ const Refuel = () => {
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         className="flex-1"
       >
-        <View 
+        <ScrollView 
           keyboardShouldPersistTaps="handled" 
           className="flex-1"
           showsVerticalScrollIndicator={false}
@@ -207,13 +281,44 @@ const Refuel = () => {
 
           {step === 1 && (
             <View className="p-4">
+              {/* Fuel Price Display */}
+              {vehicleFuel && (
+                <View className="mb-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                  <View className="flex-row justify-between items-center">
+                    <Text className="text-gray-700 font-medium">
+                      {vehicleFuel} Price per Litre:
+                    </Text>
+                    {isLoadingPrice ? (
+                      <ActivityIndicator size="small" color="#0000ff" />
+                    ) : (
+                      <Text className="text-lg font-bold text-green-600">
+                        GHS {fuelPrice.toFixed(2)}
+                      </Text>
+                    )}
+                  </View>
+                </View>
+              )}
+
+              {/* Amount Input */}
               <FormField
-                title="Fuel Quantity (Litres)"
-                placeholder="Enter fuel quantity"
-                value={fuelQuantity}
-                onTextChange={setFuelQuantity}
+                title="Amount (GHS)"
+                placeholder="Enter amount in Ghana Cedis"
+                value={amount}
+                onTextChange={setAmount}
                 keyboardType="numeric"
               />
+
+              {/* Conversion Display */}
+              {amount && fuelPrice > 0 && fuelQuantity && (
+                <View className="mt-2 mb-4 p-3 bg-gray-50 rounded-lg">
+                  <Text className="text-gray-600 text-sm">
+                    GHS {amount} ÷ GHS {fuelPrice.toFixed(2)} = {fuelQuantity} L
+                  </Text>
+                  <Text className="text-gray-500 text-xs mt-1">
+                    Based on current fuel price of GHS {fuelPrice.toFixed(2)} per litre
+                  </Text>
+                </View>
+              )}
 
               <Text className="text-gray-600 mt-3 mb-1">Vehicle</Text>
               <DropDownPicker
@@ -262,6 +367,7 @@ const Refuel = () => {
                 onPress={() => {
                   if (validateStep1()) setStep(2);
                 }}
+                disabled={isLoadingPrice}
               />
             </View>
           )}
@@ -367,16 +473,30 @@ const Refuel = () => {
                 
                 <View className="p-4">
                   <View className="flex-row justify-between items-center py-3 border-b border-gray-100">
-                    <Text className="text-sm text-gray-600">Fuel Quantity</Text>
+                    <Text className="text-sm text-gray-600">Fuel Type</Text>
                     <Text className="text-base font-bold text-gray-900">
-                      {fuelQuantity} L
+                      {vehicleFuel || "N/A"}
+                    </Text>
+                  </View>
+                  
+                  <View className="flex-row justify-between items-center py-3 border-b border-gray-100">
+                    <Text className="text-sm text-gray-600">Amount</Text>
+                    <Text className="text-base font-bold text-gray-900">
+                      GHS {amount}
                     </Text>
                   </View>
                   
                   <View className="flex-row justify-between items-center py-3 border-b border-gray-100">
                     <Text className="text-sm text-gray-600">Price per Litre</Text>
                     <Text className="text-base font-semibold text-gray-900">
-                      GHS 21.00
+                      GHS {fuelPrice.toFixed(2)}
+                    </Text>
+                  </View>
+                  
+                  <View className="flex-row justify-between items-center py-3 border-b border-gray-100">
+                    <Text className="text-sm text-gray-600">Fuel Quantity</Text>
+                    <Text className="text-base font-bold text-gray-900">
+                      {fuelQuantity} L
                     </Text>
                   </View>
                   
@@ -397,7 +517,7 @@ const Refuel = () => {
                     <Text className="text-base font-semibold text-gray-900">Total Amount</Text>
                     <View className="bg-green-50 px-3 py-2 rounded-lg">
                       <Text className="text-xl font-bold text-green-700">
-                        GHS {(fuelQuantity * 21).toFixed(2)}
+                        GHS {amount || "0.00"}
                       </Text>
                     </View>
                   </View>
@@ -412,10 +532,15 @@ const Refuel = () => {
                 className="mb-3"
               />
               
-             
+              <CustomButton
+                color="bg-gray-200"
+                title="Back"
+                onPress={() => setStep(2)}
+                textColor="text-gray-700"
+              />
             </View>
           )}
-        </View>
+        </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
