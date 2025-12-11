@@ -18,17 +18,17 @@ import CustomButton from "../../../components/CustomButton";
 import DropDownPicker from "react-native-dropdown-picker";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import AuthContext from "../../../AuthContext";
-import { useStations } from "../../../StationContext"; // Import the stations context
+import { useStations } from "../../../StationContext"; 
 import api from "../../../api";
 
 const Refuel = () => {
   const router = useRouter();
-  const { id } = useLocalSearchParams();
   const [step, setStep] = useState(1);
   const [fuelQuantity, setFuelQuantity] = useState("");
   const [vehicleType, setVehicleType] = useState(null);
+  const [vehicleFuel, setVehicleFuel] = useState(null);
   const [repaymentDate, setRepaymentDate] = useState(new Date());
-  const [stations, setStations] = useState([]);
+  const [station, setStation] = useState("");
   const [stationCode, setStationCode] = useState("");
   const [category, setCategory] = useState("commercial");
   const [stationError, setStationError] = useState("");
@@ -38,7 +38,8 @@ const Refuel = () => {
   const [open, setOpen] = useState(false);
   const [items, setItems] = useState([]);
 
-  const { user, profile } = useContext(AuthContext);
+  const { profile } = useContext(AuthContext);
+  const user_uuid = profile.user_uuid
   const { 
     stations: stationOptions, 
     loading: stationsLoading, 
@@ -49,38 +50,39 @@ const Refuel = () => {
     refreshStations 
   } = useStations();
 
-  useEffect(() => {
-    const fetchUserCars = async () => {
+ const fetchUserCars = async () => {
       try {
         const userUUID = profile.user_uuid; 
         const response = await api.get(`/cars/user/${userUUID}`);
         const carItems = response.data.map((car) => ({
           label: car.car_model || "Unnamed Car",
           value: car.car_uuid,
+          fuel_type: car.fuel_type
         }));
         setItems(carItems);
-        console.log(carItems)
       } catch (error) {
         console.error("Failed to fetch user cars:", error);
       }
     };
-
+  useEffect(() => {
     fetchUserCars();
   }, []);
 
  
+ // Handle vehicle selection change
   useEffect(() => {
-    if (id) {
-      const mappedVehicleType = items.find((item) => item.value === id)?.value;
-      if (mappedVehicleType) {
-        setVehicleType(mappedVehicleType);
+    if (vehicleType) {
+      const selectedCar = items.find((item) => item.value === vehicleType);
+      if (selectedCar) {
+        setVehicleFuel(selectedCar.fuel_type);
       }
     }
-  }, [id, items]);
+  }, [vehicleType, items]);
 
   const validateStep1 = () => {
     if (!fuelQuantity || isNaN(fuelQuantity) || Number(fuelQuantity) <= 0) {
       Alert.alert("Validation Error", "Please enter a valid fuel quantity.");
+      
       return false;
     }
     if (!vehicleType) {
@@ -98,7 +100,6 @@ const Refuel = () => {
       setStationError("Please enter a station code.");
       return false;
     }
-
     setIsVerifying(true);
     
     try {
@@ -115,11 +116,11 @@ const Refuel = () => {
       if (!isActive) {
         setStationError("This station is currently inactive. Please select another station.");
         return false;
-      }
+      }    
+        const stationDetails = getStationDetails(stationCode, 'code');
+        setStation(stationDetails.station_uuid)
 
-      // Get station details for additional validation if needed
-      const stationDetails = getStationDetails(stationCode, 'code');      
-    
+
       return true;
     } catch (error) {
       console.error("Error verifying station:", error);
@@ -152,15 +153,14 @@ const Refuel = () => {
   };
 
   const handleSubmit = () => {
-    // Get station details for submission
-    const stationDetails = getStationDetails(stationCode, 'code');
-    
+
     const refuelData = {
-      fuelQuantity,
-      vehicleType,
-      repaymentDate: category === "commercial" ? repaymentDate : null,
-      stationCode,
-      stationDetails, 
+      user_uuid,
+      car_uuid:vehicleType,
+      fuel_type:vehicleFuel,
+      fuel:fuelQuantity,
+      repaymentDate:  repaymentDate,
+      station_uuid:station
     };
     
     console.log("Submitting Refuel Request:", refuelData);
@@ -170,7 +170,7 @@ const Refuel = () => {
   const submitRefuelRequest = async (refuelData) => {
     try {
       
-      await api.post('/requests/', refuelData);
+      await api.post('/requests', refuelData);
       
       router.push("Home/Completed");
     } catch (error) {
@@ -185,7 +185,7 @@ const Refuel = () => {
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         className="flex-1"
       >
-        <ScrollView 
+        <View 
           keyboardShouldPersistTaps="handled" 
           className="flex-1"
           showsVerticalScrollIndicator={false}
@@ -415,7 +415,7 @@ const Refuel = () => {
              
             </View>
           )}
-        </ScrollView>
+        </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
