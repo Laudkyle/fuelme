@@ -7,6 +7,7 @@ import { PopupProvider, usePopup } from "../PopupContext";
 import { Modal, View, Text, TouchableOpacity } from "react-native";
 import { BlurView } from "expo-blur";
 import { AuthProvider } from "../AuthContext";
+import { StationProvider } from "../StationContext";
 SplashScreen.preventAutoHideAsync();
 
 const RenderModal = () => {
@@ -65,6 +66,7 @@ const RootLayout = () => {
   return (
     <PopupProvider>
       <AuthProvider>
+      <StationProvider>
         <GestureHandlerRootView style={{ flex: 1 }}>
           <RenderModal />
           <Stack>
@@ -77,6 +79,7 @@ const RootLayout = () => {
             />
           </Stack>
         </GestureHandlerRootView>
+        </StationProvider>
       </AuthProvider>
     </PopupProvider>
   );
