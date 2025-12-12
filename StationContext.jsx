@@ -15,7 +15,6 @@ export const StationProvider = ({ children }) => {
       
       // Store raw station data
       setRawStations(stationData);
-      console.log("This is station datac",stationData)
       
       // Create options for dropdown
       const stationOptions = stationData.map((station) => ({

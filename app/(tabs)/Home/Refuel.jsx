@@ -36,6 +36,7 @@ const Refuel = () => {
   const [isVerifying, setIsVerifying] = useState(false);
   const [fuelPrice, setFuelPrice] = useState(0);
   const [isLoadingPrice, setIsLoadingPrice] = useState(false);
+  const [isPriceFetched, setIsPriceFetched] = useState(false); // Track if price is fetched
 
   const [openDatePicker, setOpenDatePicker] = useState(false);
   const [open, setOpen] = useState(false);
@@ -69,59 +70,54 @@ const Refuel = () => {
     }
   };
 
-// Fetch fuel price from backend for a specific station
-const fetchFuelPrice = async (fuelType, stationCode) => {
-  if (!fuelType) return;
-  
-  setIsLoadingPrice(true);
-  try {
-    // Convert fuel_type to match API endpoint
-    const endpoint = fuelType.toLowerCase().includes('petrol') 
-      ? '/ppl/petrol' 
-      : '/ppl/diesel';
+  // Fetch fuel price from backend for a specific station
+  const fetchFuelPrice = async (fuelType, stationCode) => {
+    if (!fuelType || !stationCode) return;
     
-    // If we have a station code, use it to get station-specific price
-    if (stationCode) {
+    setIsLoadingPrice(true);
+    try {
+      // Convert fuel_type to match API endpoint
+      const endpoint = fuelType.toLowerCase().includes('petrol') 
+        ? '/stations/ppl/petrol' 
+        : '/stations/ppl/diesel';
+      
       const response = await api.get(`${endpoint}/${stationCode}`);
+      console.log("Fuel price response:", response.data);
       
       if (response.data && response.data.price) {
         setFuelPrice(response.data.price);
+        setIsPriceFetched(true);
       } else if (response.data && response.data.average_price) {
         // If specific station doesn't have price, use average
         setFuelPrice(response.data.average_price);
+        setIsPriceFetched(true);
         Alert.alert("Info", `${stationCode} doesn't have specific ${fuelType} price. Using average market price.`);
       } else {
         // Fallback price if API doesn't return expected format
         const defaultPrice = fuelType.toLowerCase().includes('petrol') ? 21.00 : 23.50;
         setFuelPrice(defaultPrice);
+        setIsPriceFetched(true);
         Alert.alert("Info", "Using default fuel price. Please check with station.");
       }
-    } else {
-      // No station code yet, get average market price
-      const response = await api.get(endpoint);
-      
-      if (response.data && response.data.average_price) {
-        setFuelPrice(response.data.average_price);
-      } else if (response.data && response.data.price) {
-        // For single station response (when no code but station has price)
-        setFuelPrice(response.data.price);
-      } else {
-        // Fallback price if API doesn't return expected format
-        const defaultPrice = fuelType.toLowerCase().includes('petrol') ? 21.00 : 23.50;
-        setFuelPrice(defaultPrice);
-        Alert.alert("Info", "Using default fuel price. Please check with station.");
-      }
+    } catch (error) {
+      console.error("Failed to fetch fuel price:", error);
+      // Set default prices based on fuel type
+      const defaultPrice = fuelType?.toLowerCase().includes('petrol') ? 21.00 : 23.50;
+      setFuelPrice(defaultPrice);
+      setIsPriceFetched(true);
+      Alert.alert("Warning", "Could not fetch current fuel price. Using default value.");
+    } finally {
+      setIsLoadingPrice(false);
     }
-  } catch (error) {
-    console.error("Failed to fetch fuel price:", error);
-    // Set default prices based on fuel type
-    const defaultPrice = fuelType?.toLowerCase().includes('petrol') ? 21.00 : 23.50;
-    setFuelPrice(defaultPrice);
-    Alert.alert("Warning", "Could not fetch current fuel price. Using default value.");
-  } finally {
-    setIsLoadingPrice(false);
-  }
-};
+  };
+
+  // Calculate fuel quantity when both amount and price are available AND price is fetched
+  const calculateFuelQuantity = () => {
+    if (amount && fuelPrice > 0 && isPriceFetched) {
+      const liters = (parseFloat(amount) / fuelPrice).toFixed(2);
+      setFuelQuantity(liters);
+    }
+  };
 
   useEffect(() => {
     fetchUserCars();
@@ -133,20 +129,17 @@ const fetchFuelPrice = async (fuelType, stationCode) => {
       const selectedCar = items.find((item) => item.value === vehicleType);
       if (selectedCar) {
         setVehicleFuel(selectedCar.fuel_type);
-        fetchFuelPrice(selectedCar.fuel_type,stationCode);
+        // Don't fetch price here, wait for station code
       }
     }
   }, [vehicleType, items]);
 
-  // Calculate liters when amount changes
+  // Recalculate fuel when amount changes AND price is fetched
   useEffect(() => {
-    if (amount && fuelPrice > 0) {
-      const liters = (parseFloat(amount) / fuelPrice).toFixed(2);
-      setFuelQuantity(liters);
-    } else if (!amount) {
-      setFuelQuantity("");
+    if (isPriceFetched) {
+      calculateFuelQuantity();
     }
-  }, [amount, fuelPrice]);
+  }, [amount, fuelPrice, isPriceFetched]);
 
   const validateStep1 = () => {
     if (!amount || isNaN(amount) || Number(amount) <= 0) {
@@ -159,8 +152,8 @@ const fetchFuelPrice = async (fuelType, stationCode) => {
       return false;
     }
     
-    if (fuelPrice <= 0) {
-      Alert.alert("Validation Error", "Fuel price not available. Please try again.");
+    if (!vehicleFuel) {
+      Alert.alert("Validation Error", "Please select a vehicle with a fuel type.");
       return false;
     }
     
@@ -168,8 +161,9 @@ const fetchFuelPrice = async (fuelType, stationCode) => {
   };
 
   const validateStep2 = async () => {
-    // Reset error
+    // Reset states
     setStationError("");
+    setIsPriceFetched(false);
     
     if (!stationCode.trim()) {
       setStationError("Please enter a station code.");
@@ -195,7 +189,13 @@ const fetchFuelPrice = async (fuelType, stationCode) => {
       }
       
       const stationDetails = getStationDetails(stationCode, 'code');
+      console.log("This is station details : ",stationDetails)
       setStation(stationDetails.station_uuid);
+
+      // Fetch fuel price after station validation
+      if (vehicleFuel && stationCode) {
+        await fetchFuelPrice(vehicleFuel, stationCode);
+      }
 
       return true;
     } catch (error) {
@@ -213,11 +213,9 @@ const fetchFuelPrice = async (fuelType, stationCode) => {
     if (stationError) {
       setStationError("");
     }
-    
-    // Optional: Search for stations as user types
-    if (text.length >= 2) {
-      const results = searchStations(text);
-    }
+    // Reset price fetched flag when station code changes
+    setIsPriceFetched(false);
+    setFuelPrice(0);
   };
 
   const handleScanQR = () => {
@@ -229,12 +227,18 @@ const fetchFuelPrice = async (fuelType, stationCode) => {
   };
 
   const handleSubmit = () => {
+    // Make sure we have all data before submission
+    if (!fuelQuantity || fuelQuantity === "NaN" || isNaN(parseFloat(fuelQuantity))) {
+      Alert.alert("Error", "Please complete all steps before submitting.");
+      return;
+    }
+    
     const refuelData = {
       user_uuid,
       car_uuid: vehicleType,
       fuel_type: vehicleFuel,
       fuel: fuelQuantity,
-      amount: parseFloat(amount), // Add amount to submission
+      amount: parseFloat(amount),
       repaymentDate: repaymentDate,
       station_uuid: station
     };
@@ -281,23 +285,6 @@ const fetchFuelPrice = async (fuelType, stationCode) => {
 
           {step === 1 && (
             <View className="p-4">
-              {/* Fuel Price Display */}
-              {vehicleFuel && (
-                <View className="mb-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
-                  <View className="flex-row justify-between items-center">
-                    <Text className="text-gray-700 font-medium">
-                      {vehicleFuel} Price per Litre:
-                    </Text>
-                    {isLoadingPrice ? (
-                      <ActivityIndicator size="small" color="#0000ff" />
-                    ) : (
-                      <Text className="text-lg font-bold text-green-600">
-                        GHS {fuelPrice.toFixed(2)}
-                      </Text>
-                    )}
-                  </View>
-                </View>
-              )}
 
               {/* Amount Input */}
               <FormField
@@ -308,17 +295,23 @@ const fetchFuelPrice = async (fuelType, stationCode) => {
                 keyboardType="numeric"
               />
 
-              {/* Conversion Display */}
-              {amount && fuelPrice > 0 && fuelQuantity && (
-                <View className="mt-2 mb-4 p-3 bg-gray-50 rounded-lg">
-                  <Text className="text-gray-600 text-sm">
-                    GHS {amount} ÷ GHS {fuelPrice.toFixed(2)} = {fuelQuantity} L
+              {/* Conversion Display - Only show after station is validated */}
+              {amount && fuelPrice > 0 && fuelQuantity && step >= 2 && isPriceFetched ? (
+                <View className="mt-2 mb-4 p-3 bg-green-50 rounded-lg border border-green-200">
+                  <Text className="text-gray-700 text-sm font-medium">
+                    GHS {amount} ÷ GHS {fuelPrice} = {fuelQuantity} L
                   </Text>
-                  <Text className="text-gray-500 text-xs mt-1">
-                    Based on current fuel price of GHS {fuelPrice.toFixed(2)} per litre
+                  <Text className="text-gray-600 text-xs mt-1">
+                    Based on current fuel price at station {stationCode}
                   </Text>
                 </View>
-              )}
+              ) : vehicleFuel && step === 1 ? (
+                <View className="mt-2 mb-4 p-3 bg-yellow-50 rounded-lg border border-yellow-200">
+                  <Text className="text-gray-600 text-sm">
+                    Fuel quantity will be calculated after station selection
+                  </Text>
+                </View>
+              ) : null}
 
               <Text className="text-gray-600 mt-3 mb-1">Vehicle</Text>
               <DropDownPicker
@@ -393,6 +386,25 @@ const fetchFuelPrice = async (fuelType, stationCode) => {
                 </View>
               )}
 
+              {/* Show fuel price and calculation after station is verified */}
+              {isPriceFetched && fuelPrice > 0 && vehicleFuel && amount && (
+                <View className="mt-4 mb-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                  <View className="flex-row justify-between items-center mb-2">
+                    <Text className="text-gray-700 font-medium">
+                      {vehicleFuel} Price:
+                    </Text>
+                    <Text className="text-lg font-bold text-green-600">
+                      GHS {fuelPrice}/L
+                    </Text>
+                  </View>
+                  <View className="bg-white p-3 rounded-lg">
+                    <Text className="text-gray-700 text-sm">
+                      GHS {amount} ÷ GHS {fuelPrice} = {fuelQuantity} L
+                    </Text>
+                  </View>
+                </View>
+              )}
+
               <View className="mt-4">
                 <CustomButton
                   title="Next"
@@ -432,7 +444,7 @@ const fetchFuelPrice = async (fuelType, stationCode) => {
             </View>
           )}
 
-         {step === 3 && (
+          {step === 3 && (
             <View className="p-6">
               {/* Header */}
               <View className="mb-6">
@@ -457,6 +469,9 @@ const fetchFuelPrice = async (fuelType, stationCode) => {
                       </Text>
                       <Text className="text-base font-bold text-blue-900 mt-0.5">
                         {getStationDetails(stationCode, 'code')?.name || stationCode}
+                      </Text>
+                      <Text className="text-xs text-gray-600 mt-1">
+                        Code: {stationCode}
                       </Text>
                     </View>
                   </View>
@@ -488,9 +503,12 @@ const fetchFuelPrice = async (fuelType, stationCode) => {
                   
                   <View className="flex-row justify-between items-center py-3 border-b border-gray-100">
                     <Text className="text-sm text-gray-600">Price per Litre</Text>
-                    <Text className="text-base font-semibold text-gray-900">
-                      GHS {fuelPrice.toFixed(2)}
-                    </Text>
+                    <View className="flex-row items-center">
+                      <Text className="text-base font-semibold text-gray-900 mr-2">
+                        GHS {fuelPrice}
+                      </Text>
+                      <Text className="text-xs text-gray-500">({stationCode})</Text>
+                    </View>
                   </View>
                   
                   <View className="flex-row justify-between items-center py-3 border-b border-gray-100">
@@ -530,7 +548,14 @@ const fetchFuelPrice = async (fuelType, stationCode) => {
                 title="Confirm Transaction"
                 onPress={handleSubmit}
                 className="mb-3"
+                disabled={!isPriceFetched}
               />
+              
+              {!isPriceFetched && (
+                <Text className="text-yellow-600 text-sm text-center mb-3">
+                  Please complete station verification first
+                </Text>
+              )}
               
               <CustomButton
                 color="bg-gray-200"
